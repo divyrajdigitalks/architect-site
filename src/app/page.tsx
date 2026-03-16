@@ -22,6 +22,7 @@ import {
   Phone
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -227,10 +228,10 @@ function SupervisorDashboard({ projectId }: { projectId?: string }) {
           <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">{project.name}</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="gap-2">
+          <Link href="/attendance"><Button variant="outline" className="gap-2">
             <Users className="w-5 h-5" />
             Attendance
-          </Button>
+          </Button></Link>
           <Button className="gap-2">
             <Plus className="w-5 h-5" />
             Daily Log
@@ -253,7 +254,7 @@ function SupervisorDashboard({ projectId }: { projectId?: string }) {
                     <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{task.worker}</p>
                   </div>
                 </div>
-                <Button variant="white" size="sm" className="text-indigo-600">Update Status</Button>
+                <Link href="/tasks"><Button variant="white" size="sm" className="text-indigo-600">Update Status</Button></Link>
               </div>
             ))}
           </div>
@@ -261,10 +262,12 @@ function SupervisorDashboard({ projectId }: { projectId?: string }) {
 
         <Card className="p-10 space-y-8">
           <h3 className="text-xl font-bold text-slate-900 tracking-tight">Upload Progress</h3>
-          <div className="aspect-video bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-indigo-50 transition-all">
-            <Camera className="w-10 h-10 text-slate-300" />
-            <p className="text-xs font-bold text-slate-400">Drag & drop site photos</p>
-          </div>
+          <Link href="/site-photos" className="block">
+            <div className="aspect-video bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition-all">
+              <Camera className="w-10 h-10 text-slate-300" />
+              <p className="text-xs font-bold text-slate-400">Upload Site Photos</p>
+            </div>
+          </Link>
           <div className="space-y-4 pt-4 border-t border-slate-50">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Project Health</p>
             <div className="flex items-center justify-between">
@@ -329,7 +332,7 @@ function WorkerDashboard({ projectId }: { projectId?: string }) {
               <Button 
                 variant="outline" 
                 className="h-24 rounded-[2rem] border-4 border-slate-200 gap-4 group/btn hover:bg-indigo-50 hover:border-indigo-600"
-                onClick={() => alert("Kamera khul raha hai...")}
+                onClick={() => window.location.href = "/site-photos"}
               >
                 <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center">
                   <Camera className="w-8 h-8 text-indigo-600" />
@@ -342,7 +345,7 @@ function WorkerDashboard({ projectId }: { projectId?: string }) {
 
               <Button 
                 className="h-24 rounded-[2rem] bg-green-600 hover:bg-green-700 shadow-xl shadow-green-100 gap-4 group/done active:bg-green-800"
-                onClick={() => alert("Kaam pura ho gaya!")}
+                onClick={() => window.location.href = "/tasks"}
               >
                 <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
                   <CircleCheck className="w-8 h-8 text-white" />

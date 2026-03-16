@@ -17,7 +17,8 @@ import {
   LogOut,
   MessageSquare,
   Camera,
-  X
+  X,
+  HardHat
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
@@ -28,10 +29,12 @@ const architectMenu = [
   { name: "Projects", href: "/projects", icon: Briefcase },
   { name: "Tasks", href: "/tasks", icon: CheckSquare },
   { name: "Workers", href: "/workers", icon: Users },
+  { name: "Supervisors", href: "/supervisors", icon: HardHat },
   { name: "Clients", href: "/clients", icon: UserCircle2 },
   { name: "Site Updates", href: "/site-updates", icon: ClipboardList },
   { name: "Payments", href: "/payments", icon: CreditCard },
   { name: "Calendar", href: "/calendar", icon: Calendar },
+  { name: "Attendance", href: "/attendance", icon: Calendar },
   { name: "Reports", href: "/reports", icon: BarChart3 },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
@@ -47,7 +50,8 @@ const supervisorMenu = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Active Projects", href: "/projects", icon: Briefcase },
   { name: "Today's Tasks", href: "/tasks", icon: CheckSquare },
-  { name: "Attendance", href: "/workers", icon: Users },
+  { name: "Workers", href: "/workers", icon: Users },
+  { name: "Attendance", href: "/attendance", icon: Calendar },
   { name: "Site Logs", href: "/site-updates", icon: ClipboardList },
   { name: "Site Photos", href: "/site-photos", icon: Camera },
   { name: "Messages", href: "/messages", icon: MessageSquare },

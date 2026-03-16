@@ -3,6 +3,7 @@ export const projects = [
     id: "1",
     name: "Modern Villa",
     client: "Alice Johnson",
+    clientId: "1",
     location: "Beverly Hills, CA",
     startDate: "2024-01-15",
     expectedCompletion: "2024-12-15",
@@ -11,6 +12,8 @@ export const projects = [
     budget: "$850,000",
     received: "$350,000",
     pending: "$500,000",
+    supervisorId: "s1",
+    workerIds: ["1", "4"],
     stages: [
       { name: "Layout", status: "Completed" },
       { name: "Excavation", status: "Completed" },
@@ -30,6 +33,7 @@ export const projects = [
     id: "2",
     name: "City Heights Apartment",
     client: "Bob Smith",
+    clientId: "2",
     location: "Downtown Seattle, WA",
     startDate: "2023-11-20",
     expectedCompletion: "2024-08-10",
@@ -38,6 +42,8 @@ export const projects = [
     budget: "$1,200,000",
     received: "$900,000",
     pending: "$300,000",
+    supervisorId: "s1",
+    workerIds: ["2", "3"],
     stages: [
       { name: "Layout", status: "Completed" },
       { name: "Excavation", status: "Completed" },
@@ -57,6 +63,7 @@ export const projects = [
     id: "3",
     name: "Lakeview Residence",
     client: "Charlie Brown",
+    clientId: "3",
     location: "Austin, TX",
     startDate: "2024-03-01",
     expectedCompletion: "2025-01-20",
@@ -65,6 +72,8 @@ export const projects = [
     budget: "$650,000",
     received: "$150,000",
     pending: "$500,000",
+    supervisorId: "s2",
+    workerIds: ["1"],
     stages: [
       { name: "Layout", status: "Completed" },
       { name: "Excavation", status: "In Progress" },
@@ -83,49 +92,29 @@ export const projects = [
 ];
 
 export const tasks = [
-  {
-    id: "1",
-    name: "Foundation Inspection",
-    project: "Modern Villa",
-    stage: "Foundation",
-    worker: "John Doe",
-    deadline: "2024-03-20",
-    status: "Pending",
-  },
-  {
-    id: "2",
-    name: "Electrical Wiring - Floor 1",
-    project: "City Heights Apartment",
-    stage: "Electrical",
-    worker: "Mike Ross",
-    deadline: "2024-03-18",
-    status: "In Progress",
-  },
-  {
-    id: "3",
-    name: "Plastering - Exterior Wall",
-    project: "City Heights Apartment",
-    stage: "Plaster",
-    worker: "Sarah Lane",
-    deadline: "2024-03-15",
-    status: "Completed",
-  },
-  {
-    id: "4",
-    name: "Structure Beam Reinforcement",
-    project: "Modern Villa",
-    stage: "Structure",
-    worker: "Robert Paulson",
-    deadline: "2024-03-22",
-    status: "In Progress",
-  },
+  { id: "1", name: "Foundation Inspection", project: "Modern Villa", stage: "Foundation", worker: "John Doe", deadline: "2024-03-20", status: "Pending" },
+  { id: "2", name: "Electrical Wiring - Floor 1", project: "City Heights Apartment", stage: "Electrical", worker: "Ali Hassan", deadline: "2024-03-18", status: "In Progress" },
+  { id: "3", name: "Plastering - Exterior Wall", project: "City Heights Apartment", stage: "Plaster", worker: "Sarah Lane", deadline: "2024-03-15", status: "Completed" },
+  { id: "4", name: "Structure Beam Reinforcement", project: "Modern Villa", stage: "Structure", worker: "Robert Paulson", deadline: "2024-03-22", status: "In Progress" },
+];
+
+export const supervisors = [
+  { id: "s1", name: "Mike Ross", phone: "555-2001", email: "mike@archisite.pro", experience: "8 years", assignedProjects: ["1", "2"], joinDate: "2022-03-10" },
+  { id: "s2", name: "Priya Sharma", phone: "555-2002", email: "priya@archisite.pro", experience: "5 years", assignedProjects: ["3"], joinDate: "2023-01-15" },
+  { id: "s3", name: "David Khan", phone: "555-2003", email: "david@archisite.pro", experience: "10 years", assignedProjects: [], joinDate: "2021-06-20" },
+];
+
+export const WORKER_SPECIALIZATIONS = [
+  "Mason", "Electrician", "Plumber", "Painter", "Carpenter",
+  "Steel Fixer", "Welder", "Tiler", "Plasterer", "Excavator Operator",
+  "Crane Operator", "Civil Engineer", "Interior Designer", "Supervisor",
 ];
 
 export const workers = [
-  { id: "1", name: "John Doe", type: "Mason", phone: "555-0123", rate: "$150/day", assignedProjects: ["Modern Villa"] },
-  { id: "2", name: "Mike Ross", type: "Electrician", phone: "555-0124", rate: "$200/day", assignedProjects: ["City Heights Apartment"] },
-  { id: "3", name: "Sarah Lane", type: "Painter", phone: "555-0125", rate: "$120/day", assignedProjects: ["City Heights Apartment"] },
-  { id: "4", name: "Robert Paulson", type: "Plumber", phone: "555-0126", rate: "$180/day", assignedProjects: ["Modern Villa"] },
+  { id: "1", name: "John Doe", type: "Mason", specializations: ["Mason", "Plasterer"], phone: "555-0123", rate: "$150/day", assignedProjects: ["Modern Villa"], experience: "6 years", joinDate: "2023-02-01", address: "123 Main St, Beverly Hills" },
+  { id: "2", name: "Ali Hassan", type: "Electrician", specializations: ["Electrician", "Welder"], phone: "555-0124", rate: "$200/day", assignedProjects: ["City Heights Apartment"], experience: "9 years", joinDate: "2022-08-15", address: "45 Oak Ave, Seattle" },
+  { id: "3", name: "Sarah Lane", type: "Painter", specializations: ["Painter", "Tiler"], phone: "555-0125", rate: "$120/day", assignedProjects: ["City Heights Apartment"], experience: "4 years", joinDate: "2023-05-10", address: "78 Pine Rd, Seattle" },
+  { id: "4", name: "Robert Paulson", type: "Plumber", specializations: ["Plumber", "Steel Fixer"], phone: "555-0126", rate: "$180/day", assignedProjects: ["Modern Villa"], experience: "7 years", joinDate: "2022-11-20", address: "90 Elm St, Beverly Hills" },
 ];
 
 export const clients = [
@@ -152,7 +141,7 @@ export const calendarEvents = [
 ];
 
 export const payments = [
-  { id: "1", project: "Modern Villa", milestone: "Foundation Payment", amount: "$50,000", status: "Paid", date: "2024-02-10" },
-  { id: "2", project: "Modern Villa", milestone: "Structure Payment", amount: "$75,000", status: "Pending", date: "2024-04-15" },
-  { id: "3", project: "City Heights Apartment", milestone: "Initial Payment", amount: "$100,000", status: "Paid", date: "2023-12-01" },
+  { id: "1", project: "Modern Villa", client: "Alice Johnson", milestone: "Foundation Payment", amount: "$50,000", status: "Paid", date: "2024-02-10" },
+  { id: "2", project: "Modern Villa", client: "Alice Johnson", milestone: "Structure Payment", amount: "$75,000", status: "Pending", date: "2024-04-15" },
+  { id: "3", project: "City Heights Apartment", client: "Bob Smith", milestone: "Initial Payment", amount: "$100,000", status: "Paid", date: "2023-12-01" },
 ];

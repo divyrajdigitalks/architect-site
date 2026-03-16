@@ -26,13 +26,23 @@ import {
 import Link from "next/link";
 import { useState, use } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
+import { Button } from "@/components/ui/Button";
 
 type Tab = "overview" | "tasks" | "workers" | "updates" | "photos" | "payments" | "timeline";
 
 export default function ProjectDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { user } = useAuth();
   const project = projects.find(p => p.id === id) || projects[0];
   const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const [stages, setStages] = useState(project.stages);
+
+  const canEdit = user?.role === "architect" || user?.role === "supervisor";
+
+  const updateStageStatus = (stageName: string, newStatus: string) => {
+    setStages(prev => prev.map(s => s.name === stageName ? { ...s, status: newStatus } : s));
+  };
 
   const projectTasks = tasks.filter(t => t.project === project.name);
   const projectUpdates = siteUpdates.filter(u => u.project === project.name);
@@ -72,9 +82,10 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
           <button className="px-8 py-3.5 bg-white border border-slate-200 text-slate-700 rounded-2xl text-sm font-bold shadow-sm hover:bg-slate-50 transition-all active:scale-95">
             Project Settings
           </button>
-          <button className="px-8 py-3.5 bg-indigo-600 text-white rounded-2xl text-sm font-bold shadow-xl shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95">
-            Share with Client
-          </button>
+          <Link href="/site-updates"><Button className="gap-2">
+            <Plus className="w-5 h-5" />
+            Daily Log
+          </Button></Link>
         </div>
       </div>
 
@@ -121,7 +132,7 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
 
                 <div className="relative pl-10 space-y-10">
                   <div className="absolute left-4 top-2 bottom-2 w-px bg-slate-100" />
-                  {project.stages.map((stage, idx) => (
+                  {stages.map((stage, idx) => (
                     <div key={idx} className="relative flex items-center gap-8 group">
                       <div className={cn(
                         "absolute -left-10 w-8 h-8 rounded-2xl border-4 border-white flex items-center justify-center z-10 transition-all duration-500 shadow-sm",
@@ -148,14 +159,31 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
                           )}>
                             {stage.name}
                           </p>
-                          <span className={cn(
-                            "text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg shadow-sm",
-                            stage.status === "Completed" ? "bg-white text-green-600 border border-green-100" :
-                            stage.status === "In Progress" ? "bg-white text-indigo-600 border border-indigo-100" :
-                            "bg-white text-slate-400 border border-slate-100"
-                          )}>
-                            {stage.status}
-                          </span>
+                          {canEdit ? (
+                            <select
+                              value={stage.status}
+                              onChange={(e) => updateStageStatus(stage.name, e.target.value)}
+                              className={cn(
+                                "text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg shadow-sm border cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500",
+                                stage.status === "Completed" ? "bg-white text-green-600 border-green-100" :
+                                stage.status === "In Progress" ? "bg-white text-indigo-600 border-indigo-100" :
+                                "bg-white text-slate-400 border-slate-100"
+                              )}
+                            >
+                              <option value="Pending">Pending</option>
+                              <option value="In Progress">In Progress</option>
+                              <option value="Completed">Completed</option>
+                            </select>
+                          ) : (
+                            <span className={cn(
+                              "text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg shadow-sm",
+                              stage.status === "Completed" ? "bg-white text-green-600 border border-green-100" :
+                              stage.status === "In Progress" ? "bg-white text-indigo-600 border border-indigo-100" :
+                              "bg-white text-slate-400 border border-slate-100"
+                            )}>
+                              {stage.status}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -423,23 +451,35 @@ export default function ProjectDetailsPage({ params }: { params: Promise<{ id: s
         )}
 
         {activeTab === "photos" && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="aspect-square bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-4 group hover:border-indigo-300 hover:bg-indigo-50 transition-all cursor-pointer relative overflow-hidden">
-                <div className="absolute inset-0 bg-indigo-600 opacity-0 group-hover:opacity-5 transition-opacity" />
-                <Camera className="w-10 h-10 text-slate-300 group-hover:text-indigo-400 group-hover:scale-110 transition-all duration-500" />
-                <div className="text-center">
-                  <p className="text-xs font-black text-slate-400 group-hover:text-indigo-600 uppercase tracking-widest">Site Photo #{i}</p>
-                  <p className="text-[9px] font-bold text-slate-300 group-hover:text-indigo-400 uppercase tracking-widest mt-1">Mar 12, 2024</p>
+          <div className="space-y-6">
+            <div className="flex justify-end">
+              <Link href="/site-photos">
+                <button className="px-6 py-2.5 bg-indigo-600 text-white rounded-2xl text-sm font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center gap-2">
+                  <Camera className="w-4 h-4" />
+                  Upload Photos
+                </button>
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="aspect-square bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-4 group hover:border-indigo-300 hover:bg-indigo-50 transition-all cursor-pointer relative overflow-hidden">
+                  <div className="absolute inset-0 bg-indigo-600 opacity-0 group-hover:opacity-5 transition-opacity" />
+                  <Camera className="w-10 h-10 text-slate-300 group-hover:text-indigo-400 group-hover:scale-110 transition-all duration-500" />
+                  <div className="text-center">
+                    <p className="text-xs font-black text-slate-400 group-hover:text-indigo-600 uppercase tracking-widest">Site Photo #{i}</p>
+                    <p className="text-[9px] font-bold text-slate-300 group-hover:text-indigo-400 uppercase tracking-widest mt-1">Mar 12, 2024</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-            <button className="aspect-square bg-indigo-50 rounded-[2.5rem] border-2 border-dashed border-indigo-200 flex flex-col items-center justify-center gap-4 group hover:bg-indigo-100 transition-all">
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                <Plus className="w-6 h-6 text-indigo-600" />
-              </div>
-              <p className="text-xs font-black text-indigo-600 uppercase tracking-widest">Upload Photos</p>
-            </button>
+              ))}
+              <Link href="/site-photos">
+                <button className="aspect-square w-full bg-indigo-50 rounded-[2.5rem] border-2 border-dashed border-indigo-200 flex flex-col items-center justify-center gap-4 group hover:bg-indigo-100 transition-all">
+                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                    <Plus className="w-6 h-6 text-indigo-600" />
+                  </div>
+                  <p className="text-xs font-black text-indigo-600 uppercase tracking-widest">Upload Photos</p>
+                </button>
+              </Link>
+            </div>
           </div>
         )}
       </div>

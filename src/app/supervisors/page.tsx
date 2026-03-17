@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supervisors as initialSupervisors, projects } from "@/lib/dummy-data";
 import {
   Plus, Search, Phone, Mail, Briefcase, X, LayoutGrid, List,
-  Calendar, HardHat, UserCircle2, CheckCircle2
+  Calendar, HardHat, UserCircle2, CheckCircle2, ShieldCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
@@ -13,6 +13,7 @@ import { Card } from "@/components/ui/Card";
 import Modal from "@/components/ui/Modal";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { useAuth } from "@/lib/auth-context";
+import { useRoles } from "@/lib/role-context";
 
 type Supervisor = {
   id: string;
@@ -22,6 +23,7 @@ type Supervisor = {
   experience: string;
   assignedProjects: string[];
   joinDate: string;
+  assignedRole?: string;
 };
 
 export default function SupervisorsPage() {
@@ -34,6 +36,7 @@ export default function SupervisorsPage() {
   const [assignSupervisor, setAssignSupervisor] = useState<Supervisor | null>(null);
   const [newForm, setNewForm] = useState({ name: "", phone: "", email: "", experience: "" });
 
+  const { roles } = useRoles();
   const canEdit = user?.role === "architect";
 
   const filtered = supervisors.filter(s =>
@@ -162,6 +165,21 @@ export default function SupervisorsPage() {
                   )}
                 </div>
 
+                {/* Role Assignment */}
+                {canEdit && (
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">System Role</p>
+                    <select
+                      value={sup.assignedRole ?? "supervisor"}
+                      onChange={e => setSupervisors(prev => prev.map(s => s.id === sup.id ? { ...s, assignedRole: e.target.value } : s))}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                      {roles.filter(r => r.id !== "architect" && r.id !== "client").map(r => (
+                        <option key={r.id} value={r.id}>{r.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 {/* Actions */}
                 <div className="flex gap-3 pt-2 border-t border-slate-50">
                   <Button variant="secondary" className="flex-1 text-xs" onClick={() => setProfileSupervisor(sup)}>
@@ -219,14 +237,20 @@ export default function SupervisorsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" className="text-indigo-600 font-bold text-xs" onClick={() => setProfileSupervisor(sup)}>
-                          Profile
-                        </Button>
+                        {canEdit && (
+                          <select
+                            value={sup.assignedRole ?? "supervisor"}
+                            onChange={e => setSupervisors(prev => prev.map(s => s.id === sup.id ? { ...s, assignedRole: e.target.value } : s))}
+                            className="px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                            {roles.filter(r => r.id !== "architect" && r.id !== "client").map(r => (
+                              <option key={r.id} value={r.id}>{r.name}</option>
+                            ))}
+                          </select>
+                        )}
+                        <Button variant="ghost" className="text-indigo-600 font-bold text-xs" onClick={() => setProfileSupervisor(sup)}>Profile</Button>
                         {canEdit && (
                           <Button variant="ghost" className="text-slate-500 font-bold text-xs"
-                            onClick={() => setAssignSupervisor(supervisors.find(s => s.id === sup.id) || sup)}>
-                            Assign
-                          </Button>
+                            onClick={() => setAssignSupervisor(supervisors.find(s => s.id === sup.id) || sup)}>Assign</Button>
                         )}
                       </div>
                     </TableCell>
@@ -287,6 +311,30 @@ export default function SupervisorsPage() {
               </div>
             </div>
             <div className="p-8 space-y-5">
+              {/* Role Badge */}
+              <div className="flex items-center gap-3 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                <div className="flex-1">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">System Role</p>
+                  <p className="text-sm font-bold text-indigo-700">
+                    {roles.find(r => r.id === (profileSupervisor.assignedRole ?? "supervisor"))?.name ?? "Supervisor"}
+                  </p>
+                </div>
+                {canEdit && (
+                  <select
+                    value={profileSupervisor.assignedRole ?? "supervisor"}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setSupervisors(prev => prev.map(s => s.id === profileSupervisor.id ? { ...s, assignedRole: val } : s));
+                      setProfileSupervisor(prev => prev ? { ...prev, assignedRole: val } : prev);
+                    }}
+                    className="px-3 py-1.5 border border-indigo-200 rounded-xl text-xs font-bold text-indigo-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                    {roles.filter(r => r.id !== "architect" && r.id !== "client").map(r => (
+                      <option key={r.id} value={r.id}>{r.name}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
               {[
                 { icon: Phone, label: "Phone", value: profileSupervisor.phone },
                 { icon: Mail, label: "Email", value: profileSupervisor.email },

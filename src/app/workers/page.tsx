@@ -1,7 +1,7 @@
 "use client";
 
 import { workers as initialWorkers, WORKER_SPECIALIZATIONS } from "@/lib/dummy-data";
-import { Plus, Search, Phone, LayoutGrid, List, X, MapPin, Calendar, Briefcase, HardHat, ChevronDown } from "lucide-react";
+import { Plus, Search, Phone, LayoutGrid, List, X, MapPin, Calendar, Briefcase, HardHat, ChevronDown, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
@@ -10,8 +10,9 @@ import { Card } from "@/components/ui/Card";
 import Modal from "@/components/ui/Modal";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { useAuth } from "@/lib/auth-context";
+import { useRoles } from "@/lib/role-context";
 
-type Worker = typeof initialWorkers[0];
+type Worker = typeof initialWorkers[0] & { assignedRole?: string };
 
 const emptyForm = { name: "", type: "", specializations: [] as string[], phone: "", rate: "", address: "", experience: "" };
 
@@ -26,7 +27,9 @@ export default function WorkersPage() {
   const [form, setForm] = useState(emptyForm);
   const [showSpecDropdown, setShowSpecDropdown] = useState(false);
 
+  const { roles } = useRoles();
   const canEdit = user?.role === "architect" || user?.role === "supervisor";
+  const isArchitect = user?.role === "architect";
 
   const filteredWorkers = workers.filter(w =>
     w.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -124,9 +127,20 @@ export default function WorkersPage() {
                     <span className="font-bold text-slate-900">{worker.rate}</span>
                   </div>
                 </div>
-                <Button variant="secondary" className="w-full" onClick={() => setProfileWorker(worker)}>
-                  View Profile
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="secondary" className="flex-1 text-xs" onClick={() => setProfileWorker(worker)}>View Profile</Button>
+                  {isArchitect && (
+                    <select
+                      value={(worker as Worker).assignedRole ?? ""}
+                      onChange={e => setWorkers(prev => prev.map(w => w.id === worker.id ? { ...w, assignedRole: e.target.value } : w))}
+                      className="flex-1 px-2 py-1.5 border border-slate-200 rounded-xl text-[10px] font-bold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                      <option value="">No Role</option>
+                      {roles.filter(r => r.id !== "architect" && r.id !== "client").map(r => (
+                        <option key={r.id} value={r.id}>{r.name}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
               </Card>
             ))}
           </div>
@@ -178,9 +192,20 @@ export default function WorkersPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" className="text-indigo-600 font-bold text-sm" onClick={() => setProfileWorker(worker)}>
-                        View Profile
-                      </Button>
+                      <div className="flex items-center justify-end gap-2">
+                        {isArchitect && (
+                          <select
+                            value={(worker as Worker).assignedRole ?? ""}
+                            onChange={e => setWorkers(prev => prev.map(w => w.id === worker.id ? { ...w, assignedRole: e.target.value } : w))}
+                            className="px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                            <option value="">No Role</option>
+                            {roles.filter(r => r.id !== "architect" && r.id !== "client").map(r => (
+                              <option key={r.id} value={r.id}>{r.name}</option>
+                            ))}
+                          </select>
+                        )}
+                        <Button variant="ghost" className="text-indigo-600 font-bold text-sm" onClick={() => setProfileWorker(worker)}>View Profile</Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -302,6 +327,33 @@ export default function WorkersPage() {
               </div>
             </div>
             <div className="p-8 space-y-4">
+              {/* Role Badge */}
+              {profileWorker.assignedRole && (
+                <div className="flex items-center gap-3 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                  <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">System Role</p>
+                    <p className="text-sm font-bold text-indigo-700">
+                      {roles.find(r => r.id === profileWorker.assignedRole)?.name ?? profileWorker.assignedRole}
+                    </p>
+                  </div>
+                  {isArchitect && (
+                    <select
+                      value={profileWorker.assignedRole ?? ""}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setWorkers(prev => prev.map(w => w.id === profileWorker.id ? { ...w, assignedRole: val } : w));
+                        setProfileWorker(prev => prev ? { ...prev, assignedRole: val } : prev);
+                      }}
+                      className="ml-auto px-3 py-1.5 border border-indigo-200 rounded-xl text-xs font-bold text-indigo-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                      <option value="">No Role</option>
+                      {roles.filter(r => r.id !== "architect" && r.id !== "client").map(r => (
+                        <option key={r.id} value={r.id}>{r.name}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              )}
               {[
                 { icon: Phone, label: "Phone", value: profileWorker.phone },
                 { icon: HardHat, label: "Experience", value: profileWorker.experience },

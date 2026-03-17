@@ -42,6 +42,10 @@ export default function Dashboard() {
       return <SupervisorDashboard projectId={user.projectId} />;
     case "worker":
       return <WorkerDashboard projectId={user.projectId} />;
+    case "accountant":
+      return <AccountantDashboard />;
+    case "site-engineer":
+      return <SiteEngineerDashboard />;
     default:
       return null;
   }
@@ -373,6 +377,129 @@ function WorkerDashboard({ projectId }: { projectId?: string }) {
         >
           <Phone className="w-8 h-8 text-slate-900" />
         </Button>
+      </div>
+    </div>
+  );
+}
+
+// --- Accountant Dashboard ---
+function AccountantDashboard() {
+  const totalBudget = payments.reduce((sum, p) => sum + parseFloat(p.amount.replace(/[$,]/g, "")), 0);
+  const paid = payments.filter(p => p.status === "Paid").reduce((sum, p) => sum + parseFloat(p.amount.replace(/[$,]/g, "")), 0);
+  const pending = payments.filter(p => p.status === "Pending").reduce((sum, p) => sum + parseFloat(p.amount.replace(/[$,]/g, "")), 0);
+
+  return (
+    <div className="space-y-10 animate-in fade-in duration-700">
+      <div className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm">
+        <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Financial Console</h2>
+        <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">Accountant Overview</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {[
+          { label: "Total Budget",    value: `$${totalBudget.toLocaleString()}`, color: "text-slate-900",   bg: "bg-slate-50",   border: "border-slate-200" },
+          { label: "Received",        value: `$${paid.toLocaleString()}`,         color: "text-green-700",  bg: "bg-green-50",   border: "border-green-200" },
+          { label: "Pending",         value: `$${pending.toLocaleString()}`,      color: "text-orange-700", bg: "bg-orange-50",  border: "border-orange-200" },
+        ].map(s => (
+          <Card key={s.label} className={cn("p-8 border", s.bg, s.border)}>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-500">{s.label}</p>
+            <p className={cn("text-3xl font-black mt-2", s.color)}>{s.value}</p>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="overflow-hidden p-0">
+        <div className="px-8 py-5 border-b border-slate-100">
+          <h3 className="text-base font-bold text-slate-900">Recent Payments</h3>
+        </div>
+        <table className="w-full text-left">
+          <thead>
+            <tr className="bg-slate-50/50">
+              {["Project", "Client", "Milestone", "Amount", "Status", "Date"].map(h => (
+                <th key={h} className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {payments.map(p => (
+              <tr key={p.id} className="hover:bg-slate-50/30 transition-colors">
+                <td className="px-8 py-5 text-sm font-bold text-slate-900">{p.project}</td>
+                <td className="px-8 py-5 text-sm text-slate-600">{p.client}</td>
+                <td className="px-8 py-5 text-sm text-slate-600">{p.milestone}</td>
+                <td className="px-8 py-5 text-sm font-bold text-slate-900">{p.amount}</td>
+                <td className="px-8 py-5">
+                  <span className={cn("px-3 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wider",
+                    p.status === "Paid" ? "bg-green-50 text-green-700 border-green-100" :
+                    p.status === "Pending" ? "bg-indigo-50 text-indigo-700 border-indigo-100" :
+                    "bg-red-50 text-red-700 border-red-100")}>
+                    {p.status}
+                  </span>
+                </td>
+                <td className="px-8 py-5 text-sm text-slate-500">{p.date}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+    </div>
+  );
+}
+
+// --- Site Engineer Dashboard ---
+function SiteEngineerDashboard() {
+  return (
+    <div className="space-y-10 animate-in fade-in duration-700">
+      <div className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm">
+        <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Engineering Console</h2>
+        <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">Site Engineer Overview</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {[
+          { label: "Active Projects", value: projects.filter(p => p.status === "In Progress").length, color: "text-indigo-700", bg: "bg-indigo-50", border: "border-indigo-200" },
+          { label: "Open Tasks",      value: tasks.filter(t => t.status !== "Completed").length,       color: "text-orange-700", bg: "bg-orange-50", border: "border-orange-200" },
+          { label: "Site Updates",    value: siteUpdates.length,                                        color: "text-green-700",  bg: "bg-green-50",  border: "border-green-200" },
+        ].map(s => (
+          <Card key={s.label} className={cn("p-8 border", s.bg, s.border)}>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-500">{s.label}</p>
+            <p className={cn("text-3xl font-black mt-2", s.color)}>{s.value}</p>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card className="p-8 space-y-6">
+          <h3 className="text-base font-bold text-slate-900">Project Progress</h3>
+          <div className="space-y-5">
+            {projects.map(p => (
+              <div key={p.id} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-bold text-slate-700">{p.name}</p>
+                  <span className="text-xs font-bold text-indigo-600">{p.progress}%</span>
+                </div>
+                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${p.progress}%` }} />
+                </div>
+                <p className="text-[10px] font-medium text-slate-400">{p.location}</p>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="p-8 space-y-6">
+          <h3 className="text-base font-bold text-slate-900">Pending Tasks</h3>
+          <div className="space-y-4">
+            {tasks.filter(t => t.status !== "Completed").map(task => (
+              <div key={task.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div>
+                  <p className="text-sm font-bold text-slate-900">{task.name}</p>
+                  <p className="text-xs text-slate-500">{task.project} · {task.worker}</p>
+                </div>
+                <StatusBadge status={task.status} />
+              </div>
+            ))}
+          </div>
+        </Card>
       </div>
     </div>
   );

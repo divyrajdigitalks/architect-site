@@ -1,33 +1,43 @@
 "use client";
 
-import { clients } from "@/lib/dummy-data";
+import { clients as initialClients } from "@/lib/dummy-data";
 import { useState } from "react";
-import { 
-  Plus, 
-  Search, 
-  Phone, 
-  Mail, 
-  MoreVertical,
-  Briefcase,
-  ChevronRight,
-  ShieldCheck,
-  UserCircle2,
-  Clock,
-  ArrowUpRight
-} from "lucide-react";
+import { Plus, Search, Phone, Mail, MoreVertical, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
+import { useAuth } from "@/lib/auth-context";
+
+type Client = typeof initialClients[0];
+
+const emptyForm = { name: "", email: "", phone: "", projects: [] as string[], paymentStatus: "Pending" };
 
 export default function ClientsPage() {
+  const { user } = useAuth();
+  const [clients, setClients] = useState<Client[]>(initialClients);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [form, setForm] = useState(emptyForm);
 
-  const filteredClients = clients.filter(client => 
+  const canAdd = user?.role === "architect";
+
+  const filteredClients = clients.filter(client =>
     client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     client.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleAdd = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim()) return;
+    setClients(prev => [...prev, {
+      id: String(Date.now()),
+      ...form,
+      projects: form.projects,
+    }]);
+    setForm(emptyForm);
+    setIsAddModalOpen(false);
+  };
 
   return (
     <>
@@ -37,33 +47,24 @@ export default function ClientsPage() {
             <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Client Directory</h2>
             <p className="text-sm font-medium text-slate-500 hidden sm:block">Manage client relationships and project assignments</p>
           </div>
-          
           <div className="flex items-center gap-3">
             <div className="hidden md:block">
-              <Input 
-                placeholder="Search clients..." 
-                icon={Search}
-                className="w-64"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+              <Input placeholder="Search clients..." icon={Search} className="w-64"
+                value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
-            <Button 
-              onClick={() => setIsAddModalOpen(true)} 
-              className="gap-2 shadow-lg shadow-indigo-200"
-            >
-              <Plus className="w-5 h-5" />
-              <span className="hidden sm:inline">Add Client</span>
-            </Button>
+            {canAdd && (
+              <Button onClick={() => setIsAddModalOpen(true)} className="gap-2 shadow-lg shadow-indigo-200">
+                <Plus className="w-5 h-5" />
+                <span className="hidden sm:inline">Add Client</span>
+              </Button>
+            )}
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredClients.map((client) => (
-            <div 
-              key={client.id} 
-              className="bg-white rounded-[2rem] border border-slate-200 shadow-sm p-8 space-y-8 transition-all duration-500 hover:shadow-xl hover:shadow-indigo-500/5 hover:-translate-y-2 group"
-            >
+            <div key={client.id}
+              className="bg-white rounded-[2rem] border border-slate-200 shadow-sm p-8 space-y-8 transition-all duration-500 hover:shadow-xl hover:shadow-indigo-500/5 hover:-translate-y-2 group">
               <div className="flex items-start justify-between">
                 <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-2xl font-bold text-indigo-600 border border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 shadow-inner">
                   {client.name.split(' ').map(n => n[0]).join('')}
@@ -115,37 +116,38 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      <Modal 
-        isOpen={isAddModalOpen} 
-        onClose={() => setIsAddModalOpen(false)}
-        title="Add New Client"
-      >
-        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); setIsAddModalOpen(false); }}>
+      <Modal isOpen={isAddModalOpen} onClose={() => { setIsAddModalOpen(false); setForm(emptyForm); }} title="Add New Client">
+        <form className="space-y-6" onSubmit={handleAdd}>
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 ml-1">Full Name</label>
-            <Input placeholder="e.g., Alice Johnson" required />
+            <label className="text-sm font-bold text-slate-700 ml-1">Full Name *</label>
+            <Input placeholder="e.g., Alice Johnson" value={form.name}
+              onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
-              <Input type="email" placeholder="e.g., alice@example.com" required />
+              <Input type="email" placeholder="e.g., alice@example.com" value={form.email}
+                onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 ml-1">Phone Number</label>
-              <Input placeholder="e.g., +1 234 567 890" required />
+              <Input placeholder="e.g., +1 234 567 890" value={form.phone}
+                onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 ml-1">Assigned Projects</label>
-            <Input placeholder="e.g., Modern Villa, Lakeview" />
+            <label className="text-sm font-bold text-slate-700 ml-1">Payment Status</label>
+            <select value={form.paymentStatus}
+              onChange={e => setForm(f => ({ ...f, paymentStatus: e.target.value }))}
+              className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+              <option>Pending</option>
+              <option>Paid</option>
+              <option>Overdue</option>
+            </select>
           </div>
           <div className="flex justify-end gap-4 pt-4 border-t border-slate-100">
-            <Button variant="secondary" onClick={() => setIsAddModalOpen(false)} type="button">
-              Cancel
-            </Button>
-            <Button type="submit">
-              Save Client
-            </Button>
+            <Button variant="secondary" onClick={() => { setIsAddModalOpen(false); setForm(emptyForm); }} type="button">Cancel</Button>
+            <Button type="submit">Save Client</Button>
           </div>
         </form>
       </Modal>

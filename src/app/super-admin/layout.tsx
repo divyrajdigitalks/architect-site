@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { SuperAdminAuthProvider, useSuperAdminAuth } from "@/lib/superadmin-auth";
 import { SA_RESOURCES } from "@/lib/superadmin-api";
 import { Button } from "@/components/ui/Button";
@@ -13,6 +14,12 @@ function Shell({ children }: { children: React.ReactNode }) {
   const { token, isLoading, logout } = useSuperAdminAuth();
 
   const isLogin = pathname === "/super-admin/login";
+
+  useEffect(() => {
+    if (!isLoading && !token && !isLogin) {
+      router.replace("/super-admin/login");
+    }
+  }, [isLoading, token, isLogin, router]);
 
   // Allow login page without token
   if (isLogin) return <>{children}</>;
@@ -26,7 +33,6 @@ function Shell({ children }: { children: React.ReactNode }) {
   }
 
   if (!token) {
-    router.replace("/super-admin/login");
     return null;
   }
 

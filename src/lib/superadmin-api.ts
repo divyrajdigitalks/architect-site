@@ -1,6 +1,6 @@
 "use client";
 
-export const SA_BASE_URL = "https://architecture-backend-71fw.onrender.com/architecture";
+export const SA_BASE_URL = process.env.NEXT_PUBLIC_SA_API_URL || "http://localhost:9000/architecture";
 const TOKEN_KEY = "sa_token";
 
 export function getSuperAdminToken(): string | null {

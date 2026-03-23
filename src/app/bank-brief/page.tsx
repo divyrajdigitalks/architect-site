@@ -17,6 +17,7 @@ import { Card } from "@/components/ui/Card";
 import Modal from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { useFinance } from "@/lib/finance-store";
+import { toast } from "react-toastify";
 
 export default function BankBriefPage() {
   const { bankBriefs, fetchFinanceData } = useFinance();

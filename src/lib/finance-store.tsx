@@ -1,7 +1,8 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { useAuth } from "./auth-context";
 
 export type TransactionType = "CREDIT" | "DEBIT";
 
@@ -36,14 +37,19 @@ interface FinanceContextType {
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
 
 export function FinanceProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const [bankBriefs, setBankBriefs] = useState<BankBrief[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchFinanceData = async () => {
+  const fetchFinanceData = useCallback(async () => {
     try {
       const token = localStorage.getItem("auth_token");
-      if (!token) return;
+      if (!token) {
+        setLedger([]);
+        setBankBriefs([]);
+        return;
+      }
 
       const [ledgerRes, banksRes] = await Promise.all([
         fetch("http://localhost:9000/architecture/payment-ledger", {
@@ -64,11 +70,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchFinanceData();
-  }, []);
+  }, [user, fetchFinanceData]);
 
   const addTransaction = async (data: Omit<LedgerEntry, "_id" | "date">) => {
     try {

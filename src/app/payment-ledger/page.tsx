@@ -19,6 +19,7 @@ import Modal from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { useFinance } from "@/lib/finance-store";
 import { useAuth } from "@/lib/auth-context";
+import { useProjects } from "@/lib/projects-store";
 
 export default function PaymentLedgerPage() {
   const { ledger, bankBriefs, addTransaction, isLoading } = useFinance();

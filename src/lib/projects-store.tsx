@@ -1,7 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
 import { projects as seedProjects } from "@/lib/dummy-data";
+import { useAuth } from "./auth-context";
 
 export type StageStatus = "Pending" | "In Progress" | "Completed";
 export type LifecycleStatus = "Pending" | "In Progress" | "Completed";
@@ -54,6 +55,7 @@ type CreateProjectInput = Omit<
 type ProjectsContextType = {
   projects: Project[];
   isHydrated: boolean;
+  fetchProjects: () => Promise<void>;
   getProjectById: (id: string) => Project | undefined;
   createProject: (input: CreateProjectInput) => Promise<Project>;
   updateProject: (id: string, patch: Partial<Project>) => void;
@@ -101,13 +103,17 @@ function computePhaseFromLifecycle(lifecycle?: ProjectLifecyclePhase[]): string 
 }
 
 export function ProjectsProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       const token = localStorage.getItem("auth_token");
-      if (!token) return;
+      if (!token) {
+        setProjects([]);
+        return;
+      }
 
       const res = await fetch("http://localhost:9000/architecture/project", {
         headers: {
@@ -143,13 +149,15 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
       setProjects(mapped);
     } catch (err) {
       console.error("Fetch projects error:", err);
+    } finally {
+      setIsHydrated(true);
     }
-  };
-
-  // Hydrate from backend
-  useEffect(() => {
-    fetchProjects().finally(() => setIsHydrated(true));
   }, []);
+
+  // Hydrate from backend when user changes
+  useEffect(() => {
+    fetchProjects();
+  }, [user, fetchProjects]);
 
   const api = useMemo<ProjectsContextType>(() => {
     const getProjectById = (id: string) => projects.find((p) => p.id === id);
@@ -264,6 +272,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
     return {
       projects,
       isHydrated,
+      fetchProjects,
       getProjectById,
       createProject,
       updateProject,

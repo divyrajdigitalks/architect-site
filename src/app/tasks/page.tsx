@@ -15,6 +15,7 @@ import { useAuth } from "@/lib/auth-context";
 import { API_BASE_URL } from "@/lib/api-config";
 import { useTasks } from "@/lib/tasks-store";
 import { useProjects } from "@/lib/projects-store";
+import { useCanCreate, useCanUpdate } from "@/components/PermissionGuard";
 import { toast } from "react-toastify";
 
 export default function TasksPage() {
@@ -42,7 +43,13 @@ export default function TasksPage() {
     fetchWorkers();
   }, []);
 
-  const canEdit = user?.role === "architect" || user?.role === "supervisor";
+  // ✅ Get permission-based checks
+  const canCreateTask = useCanCreate("TASK");
+  const canUpdateTask = useCanUpdate("TASK");
+  
+  // Fallback for role-based checks
+  const roleName = typeof user?.role === "object" ? user.role.roleName : (user?.role || "");
+  const canEdit = canUpdateTask || roleName.toLowerCase().includes("architect") || roleName.toLowerCase().includes("supervisor");
 
   const filteredTasks = tasks.filter(t =>
     t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -103,7 +110,7 @@ export default function TasksPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            {canEdit && (
+            {canCreateTask && (
               <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
                 <Plus className="w-5 h-5" />
                 <span className="hidden sm:inline">New Task</span>

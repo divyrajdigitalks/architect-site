@@ -64,6 +64,7 @@ const MODULE_TO_PAGE: Record<string, string> = {
   USER: "system-users",
   ROLE: "system-users",
   PERMISSION: "system-users",
+  PERMISSION_MODULE: "permissions",
   TENANT: "tenants",
   SUBSCRIPTION_PLAN: "plans",
   PROJECT: "projects",
@@ -71,12 +72,14 @@ const MODULE_TO_PAGE: Record<string, string> = {
   PROJECT_ESTIMATION: "project-estimation",
   PROJECT_UPDATE: "site-updates",
   PAYMENT_LEDGER: "payment-ledger",
+  PAYMENT: "payment-ledger",
   PROJET_TASK: "tasks",
   TASK: "tasks",
   BANK_BRIEF: "bank-brief",
   CLIENT: "clients",
   WORKER: "workers",
   WORKERTASK: "tasks",
+  WORKERPAYMENT: "payment-ledger",
   ATTENDENCE: "attendance",
   ATTENDENCE_MODULE: "attendance",
 };
@@ -120,23 +123,31 @@ export default function Sidebar({ onMobileClose }: { onMobileClose?: () => void 
   
   if (user?.role && typeof user.role !== "string" && user.role.permissions && user.role.permissions.length > 0) {
     const dynamicPages = new Set<string>();
-    dynamicPages.add("dashboard");
+    dynamicPages.add("dashboard"); // Dashboard always available
     
+    // Map each permission module to allowed pages
     user.role.permissions.forEach(p => {
       const pageKey = MODULE_TO_PAGE[p.module];
       if (pageKey) dynamicPages.add(pageKey);
     });
 
-    // Client always gets site-photos and payment-ledger
     const roleName = typeof user.role === "object" ? user.role.roleName : "";
     const rn = roleName.toLowerCase();
+
+    // Client-specific pages
     if (rn.includes("client")) {
       dynamicPages.add("projects");
       dynamicPages.add("site-photos");
-      dynamicPages.add("payment-ledger");
+      if (!dynamicPages.has("payment-ledger")) dynamicPages.add("payment-ledger");
       dynamicPages.add("project-estimation");
     }
-    // Architect/Admin always gets clients + system-users
+    
+    // Supervisor-specific pages (always add site-photos for site documentation)
+    if (rn.includes("supervisor")) {
+      if (!dynamicPages.has("site-photos")) dynamicPages.add("site-photos");
+    }
+    
+    // Architect/Admin always get clients + system-users
     if (rn.includes("architect") || rn.includes("admin") || rn === "tenant_admin") {
       dynamicPages.add("clients");
       dynamicPages.add("system-users");

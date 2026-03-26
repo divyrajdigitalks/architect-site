@@ -92,6 +92,7 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
       if (!token) throw new Error("No token");
 
       const res = await fetch(`${API_BASE_URL}/task`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
@@ -152,6 +153,7 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
       if (!token) return;
 
       await fetch(`${API_BASE_URL}/task/${id}`, {
+        method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
 

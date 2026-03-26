@@ -53,7 +53,7 @@ export function SiteUpdatesProvider({ children }: { children: React.ReactNode })
         return;
       }
 
-      const res = await fetch(`${API_BASE_URL}/projectupdate`, {
+      const res = await fetch(`${API_BASE_URL}/projectupdates`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -103,7 +103,7 @@ export function SiteUpdatesProvider({ children }: { children: React.ReactNode })
         input.images.forEach((img) => formData.append("images", img));
       }
 
-      const res = await fetch(`${API_BASE_URL}/projectupdate`, {
+      const res = await fetch(`${API_BASE_URL}/projectupdates`, {
         headers: { Authorization: `Bearer ${token}` },
         body: formData
       });
@@ -116,7 +116,7 @@ export function SiteUpdatesProvider({ children }: { children: React.ReactNode })
       const token = localStorage.getItem("auth_token");
       if (!token) return;
 
-      await fetch(`${API_BASE_URL}/projectupdate/${id}`, {
+      await fetch(`${API_BASE_URL}/projectupdates/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });

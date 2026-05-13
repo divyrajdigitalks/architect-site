@@ -15,6 +15,7 @@ export default function SuperAdminHome() {
     subscriptions: 0,
     clients: 0
   });
+  const [recentTenants, setRecentTenants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,12 +27,15 @@ export default function SuperAdminHome() {
           saFetch("/subscription-plans"),
           saFetch("/client")
         ]);
+        
+        const tenantList = Array.isArray(t) ? t : [];
         setStats({
-          tenants: Array.isArray(t) ? t.length : 0,
+          tenants: tenantList.length,
           users: Array.isArray(u) ? u.length : 0,
           subscriptions: Array.isArray(s) ? s.length : 0,
           clients: Array.isArray(c) ? c.length : 0
         });
+        setRecentTenants(tenantList.slice(0, 3));
       } catch (e) {
         console.error("Failed to load stats", e);
       } finally {
@@ -82,18 +86,40 @@ export default function SuperAdminHome() {
             <Link href="/super-admin/tenant" className="text-xs font-bold text-indigo-600 hover:underline">View All</Link>
           </div>
           <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-slate-200 shadow-sm font-bold">T{i}</div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-700">Loading...</p>
-                    <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Active Subscription</p>
+            {loading ? (
+              [1, 2, 3].map(i => (
+                <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-slate-200" />
+                    <div className="space-y-2">
+                      <div className="h-4 w-24 bg-slate-200 rounded" />
+                      <div className="h-3 w-32 bg-slate-200 rounded" />
+                    </div>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-300" />
+              ))
+            ) : recentTenants.length > 0 ? (
+              recentTenants.map((tenant) => (
+                <div key={tenant._id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-slate-200 shadow-sm font-bold text-indigo-600">
+                      {tenant.tenantName?.charAt(0) || "T"}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-700">{tenant.tenantName}</p>
+                      <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">
+                        {tenant.subscription?.status || "PENDING"}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-300" />
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-10">
+                <p className="text-sm text-slate-400 font-bold uppercase tracking-widest">No Recent Onboarding</p>
               </div>
-            ))}
+            )}
           </div>
         </Card>
 

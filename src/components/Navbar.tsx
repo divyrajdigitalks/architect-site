@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { Bell, UserCircle, Settings, Menu, CheckCircle2, Clock, AlertCircle } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
@@ -20,30 +20,43 @@ const getPageTitle = (pathname: string) => {
   if (pathname === "/settings") return "System Settings";
   if (pathname === "/site-photos") return "Site Documentation";
   if (pathname === "/messages") return "Communication Hub";
+  if (pathname === "/guest") return "Guest Access Dashboard";
   return "Dashboard";
+};
+
+const roleMap: Record<string, string> = {
+  TENANT: "Clients",
+  TENANT_ADMIN: "Director",
+  TENANT_CLIENT: "Clients",
+  ADMIN: "Director",
+  USER: "Office Team",
+  WORKER: "Agency",
+  SUPERVISOR: "Clients",
+  DIRECTOR: "Director",
+  "OFFICE-TEAM": "Office Team",
+  CLIENTS: "Clients",
+  AGENCY: "Agency",
+  ACADEMY: "Academy",
+  GUEST: "Guest",
+  ARCHITECT: "Director",
+  CLIENT: "Clients",
+  SUPERVISOR_OLD: "Office Team",
+  WORKER_OLD: "Agency",
+  ACCOUNTANT: "Academy",
+  "SITE-ENGINEER": "Clients",
 };
 
 export default function Navbar({ onMenuToggle }: { onMenuToggle?: () => void }) {
   const pathname = usePathname();
-  const { user, getEffectiveRole } = useAuth();
+  const router = useRouter();
+  const { user, getEffectiveRole, logout } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
   if (pathname === "/login") return null;
+  if (pathname.startsWith("/guest")) return null;
 
   const role = getEffectiveRole(user);
-
-  // ✅ ROLE MAPPING FIX
-  const roleMap: Record<string, string> = {
-    TENANT: "Client",
-    TENANT_ADMIN: "Architect",
-    TENANT_CLIENT: "Client",
-    ADMIN: "Architect",
-    USER: "Supervisor",
-    WORKER: "Worker",
-    SUPERVISOR: "Supervisor"
-  };
-
   const displayRole = roleMap[role?.toUpperCase()] || role;
 
   const notifications = [
@@ -82,7 +95,6 @@ export default function Navbar({ onMenuToggle }: { onMenuToggle?: () => void }) 
         </div>
 
         <div className="flex items-center gap-4">
-
           {/* Notifications */}
           <div className="relative">
             <Button 
@@ -134,6 +146,12 @@ export default function Navbar({ onMenuToggle }: { onMenuToggle?: () => void }) 
                 <button className="w-full px-4 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2">
                   <UserCircle className="w-4 h-4" />
                   Edit Profile
+                </button>
+                <button 
+                  onClick={logout}
+                  className="w-full px-4 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2 text-red-600"
+                >
+                  Sign Out
                 </button>
               </div>
             )}

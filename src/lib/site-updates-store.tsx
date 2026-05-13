@@ -54,7 +54,7 @@ export function SiteUpdatesProvider({ children }: { children: React.ReactNode })
         return;
       }
 
-      const res = await fetch(`${API_BASE_URL}/projectupdate`, {
+      const res = await fetch(`${API_BASE_URL}/projectupdates`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

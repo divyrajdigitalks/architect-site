@@ -124,10 +124,10 @@ export default function TasksPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Task Name</TableHead>
-                <TableHead>Stage</TableHead>
-                <TableHead>Assigned Worker</TableHead>
-                <TableHead>Deadline</TableHead>
+                <TableHead>Assigned Office Team</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Assigned Site Team</TableHead>
+                <TableHead>Deadline</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -138,23 +138,8 @@ export default function TasksPage() {
                     <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">{task.project}</p>
                   </TableCell>
                   <TableCell>
-                    <span className="px-2.5 py-1 bg-slate-100 text-[10px] font-bold text-slate-500 rounded uppercase tracking-wider">
-                      {task.stage}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center text-[10px] font-bold text-slate-600 border border-slate-200">
-                        {task.worker.split(" ").map((n: string) => n[0]).join("")}
-                      </div>
-                      <span className="text-sm font-medium text-slate-700">{task.worker}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
-                      <Clock className="w-4 h-4" />
-                      {task.deadline}
-                    </div>
+                    <p className="text-sm font-bold text-slate-700">Designer Name</p>
+                    <p className="text-[10px] text-slate-400 uppercase">Office Team</p>
                   </TableCell>
                   <TableCell>
                     {canEdit || task.workerId === user?.id ? (
@@ -173,6 +158,23 @@ export default function TasksPage() {
                     ) : (
                       <StatusBadge status={task.status} />
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center text-[10px] font-bold text-slate-600 border border-slate-200">
+                        {task.worker.split(" ").map((n: string) => n[0]).join("")}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-700">{task.worker}</p>
+                        <p className="text-[10px] text-slate-400 uppercase">Site Labor</p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+                      <Clock className="w-4 h-4" />
+                      {task.deadline}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

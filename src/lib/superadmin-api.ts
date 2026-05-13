@@ -27,11 +27,15 @@ function normalizeUrl(path: string) {
 }
 
 function unwrapJson(payload: any) {
-  // backend may return {data: ...} or direct array/object
+  // backend may return {data: ...}, {users: ...}, {clients: ...} or direct array/object
   if (payload && typeof payload === "object") {
     if ("data" in payload) return (payload as any).data;
     if ("result" in payload) return (payload as any).result;
     if ("items" in payload) return (payload as any).items;
+    if ("users" in payload) return (payload as any).users;
+    if ("tenants" in payload) return (payload as any).tenants;
+    if ("clients" in payload) return (payload as any).clients;
+    if ("subscriptionPlans" in payload) return (payload as any).subscriptionPlans;
   }
   return payload;
 }

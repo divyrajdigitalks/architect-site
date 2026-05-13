@@ -46,6 +46,7 @@ export default function AttendancePage() {
   const [workers, setWorkers] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState(today);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"office" | "site">("site");
 
   // ✅ Permission checks
   const canCreateAttendance = useCanCreate("ATTENDENCE");
@@ -214,10 +215,13 @@ export default function AttendancePage() {
     }
   };
 
-  // Filter workers based on search
-  const filteredWorkers = workers.filter(w =>
-    w.name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter workers based on search and team
+  const filteredWorkers = workers.filter(w => {
+    const matchesSearch = w.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    // For now, simulate team filter based on worker collection
+    // In a real app, you'd have a team or employmentType field
+    return matchesSearch;
+  });
 
   const presentCount = attendance.filter(a => a.status?.toUpperCase() === "PRESENT").length;
   const absentCount = attendance.filter(a => a.status?.toUpperCase() === "ABSENT").length;
@@ -230,16 +234,38 @@ export default function AttendancePage() {
         </div>
       ) : (
         <>
-          <div className="flex flex-row items-center justify-between gap-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1">
-              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Worker Attendance</h2>
+              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Attendance</h2>
               <p className="text-sm font-medium text-slate-500 hidden sm:block">
                 {canEdit ? "Mark and manage daily attendance" : "View attendance records"}
               </p>
             </div>
+            
+            <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200">
+              <button
+                onClick={() => setActiveTab("office")}
+                className={cn(
+                  "px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                  activeTab === "office" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                )}
+              >
+                Office Team Attendance
+              </button>
+              <button
+                onClick={() => setActiveTab("site")}
+                className={cn(
+                  "px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                  activeTab === "site" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                )}
+              >
+                Site Team Attendance
+              </button>
+            </div>
+
             <div className="flex items-center gap-3">
               <Input
-                placeholder="Search worker..."
+                placeholder="Search team member..."
                 icon={Search}
                 className="w-56 hidden md:flex"
                 value={searchQuery}
@@ -257,7 +283,7 @@ export default function AttendancePage() {
           {/* Summary Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: "Total Workers", value: filteredWorkers.length, color: "bg-slate-50 border-slate-200 text-slate-900" },
+              { label: activeTab === "office" ? "Total Office Staff" : "Total Site Workers", value: filteredWorkers.length, color: "bg-slate-50 border-slate-200 text-slate-900" },
               { label: "Present", value: presentCount, color: "bg-green-50 border-green-200 text-green-700" },
               { label: "Absent", value: absentCount, color: "bg-red-50 border-red-200 text-red-700" },
               { label: "Half-day", value: attendance.filter(a => a.status === "Half-day").length, color: "bg-orange-50 border-orange-200 text-orange-700" },
@@ -274,7 +300,9 @@ export default function AttendancePage() {
               <table className="w-full text-left">
                 <thead>
                   <tr className="bg-slate-50/50">
-                    <th className="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Worker</th>
+                    <th className="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">{activeTab === "office" ? "Office Team" : "Worker"}</th>
+                    {activeTab === "office" && <th className="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Hourly Salary</th>}
+                    {activeTab === "office" && <th className="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Total Hours</th>}
                     <th className="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Check-in</th>
                     <th className="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Check-out</th>
                     <th className="px-8 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
@@ -297,6 +325,16 @@ export default function AttendancePage() {
                             </div>
                           </div>
                         </td>
+                        {activeTab === "office" && (
+                          <td className="px-8 py-6">
+                            <span className="text-sm font-bold text-indigo-600">₹ 500/hr</span>
+                          </td>
+                        )}
+                        {activeTab === "office" && (
+                          <td className="px-8 py-6">
+                            <span className="text-sm font-bold text-slate-700">8.5 hrs</span>
+                          </td>
+                        )}
                         <td className="px-8 py-6">
                           {canEdit && !att?.checkIn && att?.status?.toUpperCase() !== "ABSENT" ? (
                             <Button variant="outline" size="sm" onClick={() => markCheckIn(worker._id)} className="text-green-600 border-green-200 hover:bg-green-50 text-xs" disabled={!canCreateAttendance && !canUpdateAttendance}>
@@ -317,20 +355,25 @@ export default function AttendancePage() {
                         </td>
                         <td className="px-8 py-6">
                           {canEdit ? (
-                            <select
-                              value={att?.status || "ABSENT"}
-                              onChange={(e) => updateStatus(worker._id, e.target.value)}
-                              disabled={!canUpdateAttendance && !canCreateAttendance}
-                              className={cn(
-                                "px-3 py-1.5 rounded-full text-[10px] font-bold border uppercase tracking-wider cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500",
-                                att?.status?.toUpperCase() === "PRESENT" ? "bg-green-50 text-green-700 border-green-200" :
-                                att?.status?.toUpperCase() === "ABSENT" ? "bg-red-50 text-red-700 border-red-200" :
-                                att?.status === "Half-day" ? "bg-orange-50 text-orange-700 border-orange-200" :
-                                "bg-blue-50 text-blue-700 border-blue-200"
+                            <div className="flex flex-col gap-1">
+                              <select
+                                value={att?.status || "ABSENT"}
+                                onChange={(e) => updateStatus(worker._id, e.target.value)}
+                                disabled={!canUpdateAttendance && !canCreateAttendance}
+                                className={cn(
+                                  "px-3 py-1.5 rounded-full text-[10px] font-bold border uppercase tracking-wider cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500",
+                                  att?.status?.toUpperCase() === "PRESENT" ? "bg-green-50 text-green-700 border-green-200" :
+                                  att?.status?.toUpperCase() === "ABSENT" ? "bg-red-50 text-red-700 border-red-200" :
+                                  att?.status === "Half-day" ? "bg-orange-50 text-orange-700 border-orange-200" :
+                                  "bg-blue-50 text-blue-700 border-blue-200"
+                                )}
+                              >
+                                {statusOptions.concat(["LEAVE"]).map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
+                              </select>
+                              {att?.status === "LEAVE" && (
+                                <span className="text-[9px] font-bold text-red-500 uppercase tracking-tight">On Leave</span>
                               )}
-                            >
-                              {statusOptions.map(s => <option key={s} value={s}>{statusLabel(s)}</option>)}
-                            </select>
+                            </div>
                           ) : (
                             <span className={cn(
                               "px-3 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wider",

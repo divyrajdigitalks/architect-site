@@ -54,8 +54,9 @@ export default function Dashboard() {
 
   const role = getEffectiveRole(user);
   const roleLower = role.toLowerCase();
+  const isSuperAdmin = (user as any)?.isSuperAdmin;
 
-  if (roleLower.includes("architect") || roleLower === "tenant_admin")
+  if (isSuperAdmin || roleLower.includes("architect") || roleLower === "tenant_admin")
     return <ArchitectDashboard projects={projects} tasks={tasks} />;
   if (roleLower.includes("client"))
     return <ClientDashboard projects={projects} tasks={tasks} projectId={user.projectId} />;

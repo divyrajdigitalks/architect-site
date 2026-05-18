@@ -138,7 +138,7 @@ export function ProjectsProvider({ children }: { children: React.ReactNode }) {
       const backendProjects = payload.projects || payload.data || [];
 
       // Filter projects for client role
-      const roleName = typeof user?.role === "object" ? (user.role as any).roleName : "";
+      const roleName = typeof user?.role === "object" ? (user.role as any)?.roleName ?? "" : (user?.role ?? "");
       const isClient = roleName === "TENANT_Client" || roleName === "Client";
 
       const mapped: Project[] = backendProjects

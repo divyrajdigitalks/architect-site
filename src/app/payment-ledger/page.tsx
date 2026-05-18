@@ -28,7 +28,7 @@ export default function PaymentLedgerPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const roleName = typeof user?.role === "object" ? (user.role as any).roleName : (user?.role || "");
+  const roleName = typeof user?.role === "object" ? (user.role as any)?.roleName ?? "" : (user?.role ?? "");
   const isClient = roleName.toLowerCase().includes("client");
   const clientProjectIds = isClient
     ? projects.filter(p => p.clientId === user?.id).map(p => p.id)

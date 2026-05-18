@@ -25,7 +25,7 @@ export default function SitePhotosPage() {
 
   useEffect(() => {
     if (projects.length > 0 && !selectedProject) {
-      const roleName = typeof user?.role === "object" ? (user.role as any).roleName : (user?.role || "");
+      const roleName = typeof user?.role === "object" ? (user.role as any)?.roleName ?? "" : (user?.role ?? "");
       const isClient = roleName.toLowerCase().includes("client");
       const initial = isClient
         ? (projects.find(p => p.clientId === user?.id)?.id || projects[0].id)
@@ -38,7 +38,7 @@ export default function SitePhotosPage() {
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const roleName = typeof user?.role === "object" ? (user.role as any).roleName : (user?.role || "");
+  const roleName = typeof user?.role === "object" ? (user.role as any)?.roleName ?? "" : (user?.role ?? "");
   const isClient = roleName.toLowerCase().includes("client");
   const canUpload = !isClient;
 

@@ -48,7 +48,7 @@ export default function TasksPage() {
   const canUpdateTask = useCanUpdate("TASK");
   
   // Fallback for role-based checks
-  const roleName = typeof user?.role === "object" ? user.role.roleName : (user?.role || "");
+  const roleName = typeof user?.role === "object" ? (user.role?.roleName ?? "") : (user?.role ?? "");
   const canEdit = canUpdateTask || roleName.toLowerCase().includes("architect") || roleName.toLowerCase().includes("supervisor");
 
   const filteredTasks = tasks.filter(t =>

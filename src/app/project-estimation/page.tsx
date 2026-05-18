@@ -33,7 +33,7 @@ export default function ProjectEstimationPage() {
   const { projects } = useProjects();
   const { addTransaction, bankBriefs } = useFinance();
   const { user } = useAuth();
-  const roleName = typeof user?.role === "object" ? (user.role as any).roleName : (user?.role || "");
+  const roleName = typeof user?.role === "object" ? (user.role as any)?.roleName ?? "" : (user?.role ?? "");
   const isClient = roleName.toLowerCase().includes("client");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAdvanceModalOpen, setIsAdvanceModalOpen] = useState(false);

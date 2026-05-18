@@ -28,8 +28,8 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
 }) => {
   const { user } = useAuth();
   
-  const roleData = typeof user?.role === "object" ? user.role : null;
-  const allowed = hasPermission(roleData, module, action);
+  const roleData = typeof user?.role === "object" ? ({ ...user.role, roleName: user.role?.roleName ?? "" } as any) : null;
+  const allowed = hasPermission(roleData, module, action as any);
 
   return <>{allowed ? children : fallback}</>;
 };
@@ -48,8 +48,8 @@ interface PermissionCheckProps {
  */
 export const usePermissionCheck = ({ module, action = "READ" }: PermissionCheckProps): boolean => {
   const { user } = useAuth();
-  const roleData = typeof user?.role === "object" ? user.role : null;
-  return hasPermission(roleData, module, action);
+  const roleData = typeof user?.role === "object" ? ({ ...user.role, roleName: user.role?.roleName ?? "" } as any) : null;
+  return hasPermission(roleData, module, action as any);
 };
 
 /**
@@ -57,25 +57,25 @@ export const usePermissionCheck = ({ module, action = "READ" }: PermissionCheckP
  */
 export const useCanCreate = (module: string): boolean => {
   const { user } = useAuth();
-  const roleData = typeof user?.role === "object" ? user.role : null;
+  const roleData = typeof user?.role === "object" ? ({ ...user.role, roleName: user.role?.roleName ?? "" } as any) : null;
   return canCreate(roleData, module);
 };
 
 export const useCanRead = (module: string): boolean => {
   const { user } = useAuth();
-  const roleData = typeof user?.role === "object" ? user.role : null;
+  const roleData = typeof user?.role === "object" ? ({ ...user.role, roleName: user.role?.roleName ?? "" } as any) : null;
   return canRead(roleData, module);
 };
 
 export const useCanUpdate = (module: string): boolean => {
   const { user } = useAuth();
-  const roleData = typeof user?.role === "object" ? user.role : null;
+  const roleData = typeof user?.role === "object" ? ({ ...user.role, roleName: user.role?.roleName ?? "" } as any) : null;
   return canUpdate(roleData, module);
 };
 
 export const useCanDelete = (module: string): boolean => {
   const { user } = useAuth();
-  const roleData = typeof user?.role === "object" ? user.role : null;
+  const roleData = typeof user?.role === "object" ? ({ ...user.role, roleName: user.role?.roleName ?? "" } as any) : null;
   return canDelete(roleData, module);
 };
 
@@ -98,8 +98,8 @@ export const PermissionRequired: React.FC<PermissionRequiredProps> = ({
   children,
 }) => {
   const { user } = useAuth();
-  const roleData = typeof user?.role === "object" ? user.role : null;
-  const allowed = hasPermission(roleData, module, action);
+  const roleData = typeof user?.role === "object" ? ({ ...user.role, roleName: user.role?.roleName ?? "" } as any) : null;
+  const allowed = hasPermission(roleData, module, action as any);
 
   if (typeof children === "function") {
     return <>{children(allowed)}</>;

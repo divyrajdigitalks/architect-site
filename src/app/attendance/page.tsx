@@ -53,8 +53,8 @@ export default function AttendancePage() {
   const canUpdateAttendance = useCanUpdate("ATTENDENCE");
   const canDeleteAttendance = useCanDelete("ATTENDENCE");
   
-  // Fallback for role-based checks
-  const roleName = typeof user?.role === "object" ? user.role.roleName : (user?.role || "");
+  // Fallback for role-based checks (ensure roleName is a string)
+  const roleName = typeof user?.role === "object" ? (user.role?.roleName ?? "") : (user?.role ?? "");
   const canEdit = canUpdateAttendance || roleName.toLowerCase().includes("architect") || roleName.toLowerCase().includes("supervisor");
 
   const fetchAttendanceData = async () => {

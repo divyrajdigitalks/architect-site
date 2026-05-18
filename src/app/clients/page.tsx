@@ -74,7 +74,7 @@ export default function ClientsPage() {
     fetchClients();
   }, [fetchClients]);
 
-  const roleName = typeof user?.role === "object" ? user.role.roleName : (user?.role || "");
+  const roleName = typeof user?.role === "object" ? (user.role?.roleName ?? "") : (user?.role ?? "");
   const canAdd =
     roleName.toLowerCase().includes("architect") ||
     roleName.toLowerCase().includes("admin") ||

@@ -184,7 +184,7 @@ export default function Sidebar({ onMobileClose }: { onMobileClose?: () => void 
       if (pageKey) dynamicPages.add(pageKey);
     });
 
-    const roleName = typeof user.role === "object" ? user.role.roleName : "";
+    const roleName = typeof user.role === "object" ? (user.role?.roleName ?? "") : (user.role ?? "");
     const rn = roleName.toLowerCase();
 
     if (rn.includes("client") || rn.includes("clients")) {
